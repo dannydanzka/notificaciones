@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Notificaciones</string>
+    <string name="titulo">EJEMPLOS DE NOTIFICACIÓN</string>
+    <string name="basica">Básica</string>
+    <string name="toque">Acción de toque</string>
+    <string name="activity1">Acción al tocar la activity</string>
+    <string name="accion">Botón de acción</string>
+    <string name="si">Aceptar</string>
+    <string name="no">Cancelar</string>
+    <string name="progreso">Barra de progreso</string>
+</resources>

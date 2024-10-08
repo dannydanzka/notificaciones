@@ -1,0 +1,30 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <Button
+        android:id="@+id/btnBasica"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/basica" />
+
+    <Button
+        android:id="@+id/btnToque"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/toque" />
+
+    <Button
+        android:id="@+id/btnAccion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/accion" />
+
+    <Button
+        android:id="@+id/btnProgreso"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/progreso" />
+</LinearLayout>
