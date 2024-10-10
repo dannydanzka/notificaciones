@@ -10,6 +10,13 @@
         android:id="@+id/txtPending"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Pending Activity"
+        android:text="Acción al tocar la Activity"
         android:textSize="20sp" />
+
+    <Button
+        android:id="@+id/btnRegresar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Regresar" />
+
 </LinearLayout>

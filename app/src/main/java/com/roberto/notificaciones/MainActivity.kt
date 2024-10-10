@@ -1,147 +1,205 @@
 package com.roberto.notificaciones
 
 import android.Manifest
-import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.widget.Button
+import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
+import android.app.PendingIntent
+import android.content.Intent
 import android.widget.Toast
 
 class MainActivity : AppCompatActivity() {
 
-    private val CHANNEL_ID = "Canal_notificacion"
-    private val REQUEST_CODE_NOTIFICATION_PERMISSION = 1
+    private lateinit var edtPeso: EditText
+    private lateinit var edtEstatura: EditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Verificar y solicitar permiso de notificaciones
+        edtPeso = findViewById(R.id.edtPeso)
+        edtEstatura = findViewById(R.id.edtEstatura)
+
+        // Botón para calcular el IMC
+        findViewById<Button>(R.id.btnCalcular).setOnClickListener {
+            calcularIMC()
+        }
+
+        // Botón para limpiar los campos
+        findViewById<Button>(R.id.btnLimpiar).setOnClickListener {
+            limpiarCampos()
+        }
+
+        // Verificar permisos para notificaciones
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
                     this, Manifest.permission.POST_NOTIFICATIONS
                 ) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(
-                    this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), REQUEST_CODE_NOTIFICATION_PERMISSION
+                    this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 101
                 )
             }
         }
 
-        // Crear canal de notificación
-        createNotificationChannel()
-
-        // Asignar listeners a los botones
+        // Asignar listeners a los botones de notificación
         findViewById<Button>(R.id.btnBasica).setOnClickListener {
-            showBasicNotification()
+            mostrarNotificacionBasica()
         }
 
         findViewById<Button>(R.id.btnToque).setOnClickListener {
-            showNotificationWithTapAction()
+            mostrarNotificacionConToque()
         }
 
         findViewById<Button>(R.id.btnAccion).setOnClickListener {
-            showNotificationWithActions()
+            mostrarNotificacionConBotones()
         }
 
         findViewById<Button>(R.id.btnProgreso).setOnClickListener {
-            showProgressNotification()
+            mostrarNotificacionConBarraDeProgreso()
         }
     }
 
-    // Método para crear el canal de notificación
-    private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = "Canal de Notificaciones"
-            val descriptionText = "Descripción del canal"
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
-                description = descriptionText
+    // Función para calcular el IMC y lanzar la notificación
+    private fun calcularIMC() {
+        if (edtPeso.text.isNotEmpty() && edtPeso.text.isNotBlank() &&
+            edtEstatura.text.isNotEmpty() && edtEstatura.text.isNotBlank()) {
+
+            val peso = edtPeso.text.toString().toFloat()
+            val estatura = edtEstatura.text.toString().toFloat()
+            val imc = peso / (estatura * estatura)
+
+            Toast.makeText(this, "IMC: $imc", Toast.LENGTH_SHORT).show()
+
+            // Limpiar los campos inmediatamente después de calcular el IMC
+            limpiarCampos()
+
+            // Notificación para resultado del IMC
+            if (imc > 25.0f) {
+                Toast.makeText(this, "¡Estás pasado de peso!", Toast.LENGTH_SHORT).show()
+
+                // Preparar notificación de aceptar/cancelar
+                mostrarNotificacionIMC(imc, true)
+
+            } else {
+                Toast.makeText(this, "¡Estás en buen estado!", Toast.LENGTH_SHORT).show()
+
+                // Preparar notificación de aceptar/cancelar
+                mostrarNotificacionIMC(imc, false)
             }
-            val notificationManager: NotificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
+        } else {
+            Toast.makeText(this, "Campos vacíos. ¡Por favor completa los datos!", Toast.LENGTH_SHORT).show()
         }
     }
 
-    // Método para manejar la notificación básica
-    private fun showBasicNotification() {
-        val notificationId = 101
-        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
+    // Función para mostrar notificación de IMC con Aceptar o Cancelar
+    private fun mostrarNotificacionIMC(imc: Float, sobrepeso: Boolean) {
+        val titulo = if (sobrepeso) "Tu IMC es $imc. ¡Cuidado!" else "Tu IMC es $imc. ¡Saludable!"
+        val texto = if (sobrepeso) "¿Te gustaría agendar una cita con un nutricionista?" else "¿Te gustaría más información sobre el IMC?"
+
+        // Intent para aceptar (dirige a FormularioActivity)
+        val intentAceptar = Intent(this, FormularioActivity::class.java)
+        val pendingIntentAceptar = PendingIntent.getActivity(
+            this, 0, intentAceptar, PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // Intent para cancelar (redirige a MainActivity)
+        val intentCancelar = Intent(this, MainActivity::class.java)
+        val pendingIntentCancelar: PendingIntent = PendingIntent.getActivity(
+            this, 0, intentCancelar, PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // Configurar la notificación con dos botones: Aceptar y Cancelar
+        val builder = NotificationCompat.Builder(this, "Canal_notificacion")
+            .setSmallIcon(R.drawable.notification_icon)
+            .setContentTitle(titulo)
+            .setContentText(texto)
+            .addAction(R.drawable.notification_icon, getString(R.string.si), pendingIntentAceptar)
+            .addAction(R.drawable.notification_icon, getString(R.string.no), pendingIntentCancelar)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+
+        // Mostrar la notificación
+        with(NotificationManagerCompat.from(this)) {
+            notify(105, builder.build())
+        }
+    }
+
+    // Limpiar los campos de peso y estatura
+    private fun limpiarCampos() {
+        edtPeso.text.clear()
+        edtEstatura.text.clear()
+        edtPeso.requestFocus()
+    }
+
+    // Notificación básica
+    private fun mostrarNotificacionBasica() {
+        val builder = NotificationCompat.Builder(this, "Canal_notificacion")
             .setSmallIcon(R.drawable.notification_icon)
             .setContentTitle("Notificación Básica")
-            .setContentText("Esta es una notificación básica")
+            .setContentText("Esta es una notificación básica.")
+            .setStyle(NotificationCompat.BigTextStyle().bigText("Esta es una notificación básica con más contenido visible si expandes la notificación."))
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
         with(NotificationManagerCompat.from(this)) {
-            notify(notificationId, builder.build())
+            notify(101, builder.build())
         }
     }
 
-    // Método para manejar la notificación con acción de toque
-    private fun showNotificationWithTapAction() {
-        val notificationId = 102
+    // Notificación con acción de toque
+    private fun mostrarNotificacionConToque() {
         val intent = Intent(this, PendingActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(
             this, 0, intent, PendingIntent.FLAG_IMMUTABLE
         )
 
-        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
+        val builder = NotificationCompat.Builder(this, "Canal_notificacion")
             .setSmallIcon(R.drawable.notification_icon)
             .setContentTitle("Notificación con Toque")
-            .setContentText("Toque para abrir la Activity")
+            .setContentText("Toca para abrir una Activity.")
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
         with(NotificationManagerCompat.from(this)) {
-            notify(notificationId, builder.build())
+            notify(102, builder.build())
         }
     }
 
-    // Método para manejar la notificación con botones de acción
-    private fun showNotificationWithActions() {
-        val notificationId = 103
+    // Notificación con botones de acción
+    private fun mostrarNotificacionConBotones() {
         val intentSi = Intent(this, PendingActivity::class.java).apply {
             putExtra("accion", 1)
-        }
-        val intentNo = Intent(this, PendingActivity::class.java).apply {
-            putExtra("accion", 2)
         }
 
         val pendingIntentSi = PendingIntent.getActivity(
             this, 0, intentSi, PendingIntent.FLAG_IMMUTABLE
         )
-        val pendingIntentNo = PendingIntent.getActivity(
-            this, 0, intentNo, PendingIntent.FLAG_IMMUTABLE
-        )
 
-        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
+        // La opción de "Cancelar" solo cierra la notificación
+        val builder = NotificationCompat.Builder(this, "Canal_notificacion")
             .setSmallIcon(R.drawable.notification_icon)
-            .setContentTitle("Notificación con Acciones")
-            .setContentText("Selecciona una opción")
+            .setContentTitle("Notificación con Botones")
+            .setContentText("Selecciona una opción.")
             .addAction(R.drawable.notification_icon, getString(R.string.si), pendingIntentSi)
-            .addAction(R.drawable.notification_icon, getString(R.string.no), pendingIntentNo)
+            .addAction(0, getString(R.string.no), null) // No hacemos nada con "Cancelar"
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
         with(NotificationManagerCompat.from(this)) {
-            notify(notificationId, builder.build())
+            notify(103, builder.build())
         }
     }
 
-    // Método para manejar la notificación con barra de progreso
-    private fun showProgressNotification() {
-        val notificationId = 104
-        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
+    // Notificación con barra de progreso
+    private fun mostrarNotificacionConBarraDeProgreso() {
+        val builder = NotificationCompat.Builder(this, "Canal_notificacion")
             .setSmallIcon(R.drawable.notification_icon)
             .setContentTitle("Descargando")
             .setContentText("Progreso de descarga")
@@ -149,34 +207,19 @@ class MainActivity : AppCompatActivity() {
 
         NotificationManagerCompat.from(this).apply {
             builder.setProgress(100, 0, false)
-            notify(notificationId, builder.build())
+            notify(104, builder.build())
 
-            // Simulación de descarga en un hilo separado
+            // Simulación de descarga
             Thread {
                 for (progress in 0..100 step 10) {
                     Thread.sleep(1000)
                     builder.setProgress(100, progress, false)
-                    notify(notificationId, builder.build())
+                    notify(104, builder.build())
                 }
                 builder.setContentText("Descarga completada")
                     .setProgress(0, 0, false)
-                notify(notificationId, builder.build())
+                notify(104, builder.build())
             }.start()
-        }
-    }
-
-    // Sobrescribir el resultado de la solicitud de permisos
-    override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_CODE_NOTIFICATION_PERMISSION) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // El permiso fue otorgado, continuar con las notificaciones
-            } else {
-                // El permiso fue denegado
-                Toast.makeText(this, "Permiso de notificaciones denegado", Toast.LENGTH_SHORT).show()
-            }
         }
     }
 }

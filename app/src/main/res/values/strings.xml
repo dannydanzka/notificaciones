@@ -1,11 +1,25 @@
 <resources>
     <string name="app_name">Notificaciones</string>
-    <string name="titulo">EJEMPLOS DE NOTIFICACIÓN</string>
-    <string name="basica">Básica</string>
-    <string name="toque">Acción de toque</string>
-    <string name="activity1">Acción al tocar la activity</string>
-    <string name="accion">Botón de acción</string>
+    <string name="tituloIMC">Cálculo de Indice de Masa Corporal (IMC)</string>
+    <string name="peso">Ingresa peso en kilogramos</string>
+    <string name="estatura">Ingresa altura en metros</string>
+    <string name="calcular">Calcular</string>
+
+    <!-- Formulario Activity -->
+    <string name="tituloRegistro">Registro de cita</string>
+    <string name="nombre">Ingresa nombre(s)</string>
+    <string name="apellidos">Ingresa apellidos(s)</string>
+    <string name="registrar">Registrar</string>
+
+    <!-- Info Activity -->
+    <string name="tituloInfo">Información sobre IMC</string>
+    <string name="detalleIMC">Para adultos de 20 años o más, el IMC se interpreta usando categorías de estado de peso estándar. Estas categorías son iguales para hombres y mujeres de todos los tipos de cuerpo y edades.
+
+    Las personas obesas y con sobrepeso tienen más probabilidades de sufrir infartos y accidentes cerebrovasculares. La grasa abdominal en particular está relacionada con otros factores de riesgo cardiovascular como la diabetes, la hipertensión, el aumento de la masa cardíaca y el colesterol alto. Todos estos factores de riesgo provocan que el colesterol se acumule en las paredes de las arterias y se creen placas.</string>
+
+    <!-- Notificaciones -->
+    <string name="notificacionIMCAlto">Tu IMC es alto</string>
+    <string name="notificacionIMCNormal">Tu IMC es normal</string>
     <string name="si">Aceptar</string>
     <string name="no">Cancelar</string>
-    <string name="progreso">Barra de progreso</string>
 </resources>
