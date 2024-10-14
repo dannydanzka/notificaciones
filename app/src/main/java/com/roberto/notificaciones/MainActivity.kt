@@ -108,13 +108,13 @@ class MainActivity : AppCompatActivity() {
         // Intent para aceptar (dirige a FormularioActivity)
         val intentAceptar = Intent(this, FormularioActivity::class.java)
         val pendingIntentAceptar = PendingIntent.getActivity(
-            this, 0, intentAceptar, PendingIntent.FLAG_IMMUTABLE
+            this, 1, intentAceptar, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         // Intent para cancelar (redirige a MainActivity)
         val intentCancelar = Intent(this, MainActivity::class.java)
         val pendingIntentCancelar: PendingIntent = PendingIntent.getActivity(
-            this, 0, intentCancelar, PendingIntent.FLAG_IMMUTABLE
+            this, 2, intentCancelar, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         // Configurar la notificación con dos botones: Aceptar y Cancelar
@@ -124,6 +124,7 @@ class MainActivity : AppCompatActivity() {
             .setContentText(texto)
             .addAction(R.drawable.notification_icon, getString(R.string.si), pendingIntentAceptar)
             .addAction(R.drawable.notification_icon, getString(R.string.no), pendingIntentCancelar)
+            .setAutoCancel(true)  // Cierra la notificación automáticamente al hacer clic
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
         // Mostrar la notificación
@@ -183,13 +184,13 @@ class MainActivity : AppCompatActivity() {
             this, 0, intentSi, PendingIntent.FLAG_IMMUTABLE
         )
 
-        // La opción de "Cancelar" solo cierra la notificación
+        // Aquí asignamos el mismo PendingIntent para el botón "Cancelar"
         val builder = NotificationCompat.Builder(this, "Canal_notificacion")
             .setSmallIcon(R.drawable.notification_icon)
             .setContentTitle("Notificación con Botones")
             .setContentText("Selecciona una opción.")
             .addAction(R.drawable.notification_icon, getString(R.string.si), pendingIntentSi)
-            .addAction(0, getString(R.string.no), null) // No hacemos nada con "Cancelar"
+            .addAction(R.drawable.notification_icon, getString(R.string.no), pendingIntentSi) // "Cancelar" hace lo mismo que "Aceptar"
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
         with(NotificationManagerCompat.from(this)) {
