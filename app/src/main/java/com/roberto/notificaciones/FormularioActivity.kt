@@ -22,9 +22,8 @@ class FormularioActivity : AppCompatActivity() {
             registrarCita()
         }
 
-        // Botón para regresar a la pantalla anterior
         findViewById<Button>(R.id.btnRegresar).setOnClickListener {
-            finish()  // Regresa a la pantalla anterior
+            finish()
         }
     }
 
@@ -35,9 +34,11 @@ class FormularioActivity : AppCompatActivity() {
         if (nombre.isNotBlank() && apellidos.isNotBlank()) {
             Toast.makeText(this, "Cita registrada a nombre de $nombre $apellidos", Toast.LENGTH_LONG).show()
 
-            // Notificación de éxito al registrar la cita
-            Helpers.enviarNotificacionConAccion(this, InfoActivity::class.java,
-                "Registro exitoso", "Cita registrada correctamente. Haz clic para ver más información.")
+            // Notificación corregida
+            Helpers.enviarNotificacionConAccion(
+                this, InfoActivity::class.java,
+                "Registro exitoso", "Cita registrada correctamente. Haz clic para ver más información."
+            )
 
             limpiarCampos()
         } else {

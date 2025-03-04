@@ -1,6 +1,7 @@
 package com.roberto.notificaciones
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -14,21 +15,32 @@ class PendingActivity : AppCompatActivity() {
         setContentView(R.layout.activity_pending)
 
         val accion = intent.getIntExtra("accion", -1)
+        Log.d("DEBUG", "Intent recibido con acción: $accion")
+
         val mensaje = when (accion) {
             1 -> "Seleccionaste Aceptar"
             2 -> "Seleccionaste Cancelar"
             else -> "Acción al tocar la Activity"
         }
 
-        findViewById<TextView>(R.id.txtPending).text = mensaje
+        val txtPending = findViewById<TextView>(R.id.txtPending)
+        val btnRegresar = findViewById<Button>(R.id.btnRegresar)
+
+        txtPending?.text = mensaje
         Toast.makeText(this, mensaje, Toast.LENGTH_SHORT).show()
 
-        // Botón para regresar a la pantalla anterior
-        findViewById<Button>(R.id.btnRegresar).setOnClickListener {
+        btnRegresar?.setOnClickListener {
             finish()  // Regresa a la pantalla anterior
         }
 
-        // Eliminar notificaciones
-        NotificationManagerCompat.from(this).cancelAll()
+        // Eliminar solo la notificación específica
+        val notificationId = when (accion) {
+            1 -> 105  // ID de notificación para aceptar
+            2 -> 106  // ID de notificación para cancelar
+            else -> 201 // Otra notificación
+        }
+
+        Log.d("DEBUG", "Cancelando notificación con ID: $notificationId")
+        NotificationManagerCompat.from(this).cancel(notificationId)
     }
 }
